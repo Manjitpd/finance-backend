@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 class UserCreate(BaseModel):
@@ -11,3 +13,4 @@ class UserResponse(BaseModel):
     name: str
     email: str
     role: str
+    is_active: Optional[bool] = True

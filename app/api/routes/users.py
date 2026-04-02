@@ -1,67 +1,69 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import require_role
 from app.db.session import get_db
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserResponse
 from app.services.user_service import create_user, delete_user, get_all_users, get_user_by_id, update_user
+from typing import List
 
 router = APIRouter()
 
-@router.post("/")
+@router.post("/", response_model=UserResponse)
 async def create_user_api(
     data: UserCreate,
     db: AsyncSession = Depends(get_db),
-    user=Depends(require_role(["admin"]))
+    user = Depends(require_role(["admin"]))
 ):
-    return await create_user(db, data)
+    result = await create_user(db, data)
+    
+    if "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    
+    return result
 
-
-@router.get("/")
+@router.get("/", response_model=List[UserResponse])
 async def get_users(
     db: AsyncSession = Depends(get_db),
-    user=Depends(require_role(["admin"]))
+    user = Depends(require_role(["admin"]))
 ):
     return await get_all_users(db)
 
-
-@router.get("/{user_id}")
+@router.get("/{user_id}", response_model=UserResponse)
 async def get_user(
     user_id: str,
     db: AsyncSession = Depends(get_db),
-    user=Depends(require_role(["admin"]))
+    user = Depends(require_role(["admin"]))
 ):
     result = await get_user_by_id(db, user_id)
 
     if not result:
-        return {"error": "User not found"}
+        raise HTTPException(status_code=404, detail="User not found")
 
     return result
-
 
 @router.put("/{user_id}")
 async def update_user_api(
     user_id: str,
     data: UserCreate,
     db: AsyncSession = Depends(get_db),
-    user=Depends(require_role(["admin"]))
+    user = Depends(require_role(["admin"]))
 ):
     updated_user = await update_user(db, user_id, data)
 
     if not updated_user:
-        return {"error": "User not found"}
+        raise HTTPException(status_code=404, detail="User not found")
 
-    return {"message": "User updated successfully"}
-
+    return {"message": "User updated successfully", "user": updated_user}
 
 @router.delete("/{user_id}")
 async def delete_user_api(
     user_id: str,
     db: AsyncSession = Depends(get_db),
-    user=Depends(require_role(["admin"]))
+    user = Depends(require_role(["admin"]))
 ):
     success = await delete_user(db, user_id)
 
     if not success:
-        return {"error": "User not found"}
+        raise HTTPException(status_code=404, detail="User not found")
 
     return {"message": "User deleted successfully"}
