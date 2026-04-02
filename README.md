@@ -14,6 +14,30 @@ It demonstrates:
 
 ---
 
+## 🌐 Live API
+
+API Documentation (Swagger UI):  
+https://finance-backend-fz9d.onrender.com/docs
+
+
+---
+## 🔐 Demo Credentials
+
+Email: ritik@gmail.com  
+Password: ritik@123  
+
+### How to Use
+
+1. Open Swagger UI  
+2. Call POST /auth/login  
+3. Copy access_token  
+4. Click "Authorize" 🔒  
+5. Paste:
+   Bearer <your_token>  
+6. Now you can use all APIs
+
+---
+
 ## 🏗️ Tech Stack
 
 * **Framework:** FastAPI
