@@ -11,5 +11,6 @@ router = APIRouter()
 async def create_user_api(
     data: UserCreate,
     db: AsyncSession = Depends(get_db),
+    user=Depends(require_role(["admin"]))
 ):
     return await create_user(db, data)
