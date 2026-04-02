@@ -4,20 +4,17 @@ from app.models.user import User
 import uuid
 
 async def create_user(db: AsyncSession, data):
-    """Create a new user and return a dictionary"""
-    # Check if user already exists
     result = await db.execute(select(User).where(User.email == data.email))
     existing_user = result.scalars().first()
     
     if existing_user:
         return {"error": "User with this email already exists"}
     
-    # Create new user
     user = User(
         id=str(uuid.uuid4()),
         name=data.name,
         email=data.email,
-        password=data.password,  # In production, hash this!
+        password=data.password, 
         role=data.role,
         is_active=True
     )
@@ -26,7 +23,6 @@ async def create_user(db: AsyncSession, data):
     await db.commit()
     await db.refresh(user)
     
-    # Return a dictionary instead of SQLAlchemy object
     return {
         "id": user.id,
         "name": user.name,
@@ -36,7 +32,6 @@ async def create_user(db: AsyncSession, data):
     }
 
 async def get_all_users(db: AsyncSession):
-    """Get all users as dictionaries"""
     result = await db.execute(select(User))
     users = result.scalars().all()
     
@@ -52,7 +47,6 @@ async def get_all_users(db: AsyncSession):
     ]
 
 async def get_user_by_id(db: AsyncSession, user_id: str):
-    """Get a single user by ID as dictionary"""
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalars().first()
 
@@ -68,7 +62,6 @@ async def get_user_by_id(db: AsyncSession, user_id: str):
     }
 
 async def update_user(db: AsyncSession, user_id: str, data):
-    """Update a user"""
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalars().first()
 
@@ -77,9 +70,10 @@ async def update_user(db: AsyncSession, user_id: str, data):
 
     user.name = data.name
     user.email = data.email
-    if data.password:  # Only update password if provided
-        user.password = data.password  # In production, hash this!
     user.role = data.role
+
+    if data.password is not None and data.password != "":
+        user.password = data.password  
 
     await db.commit()
     await db.refresh(user)
@@ -93,13 +87,15 @@ async def update_user(db: AsyncSession, user_id: str, data):
     }
 
 async def delete_user(db: AsyncSession, user_id: str):
-    """Delete a user"""
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalars().first()
 
     if not user:
         return None
 
-    await db.delete(user)
+    user.is_active = False
+
     await db.commit()
+    await db.refresh(user)
+
     return True

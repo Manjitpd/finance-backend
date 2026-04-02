@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import require_role
 from app.db.session import get_db
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.services.user_service import create_user, delete_user, get_all_users, get_user_by_id, update_user
 from typing import List
 
@@ -44,7 +44,7 @@ async def get_user(
 @router.put("/{user_id}")
 async def update_user_api(
     user_id: str,
-    data: UserCreate,
+    data: UserUpdate,
     db: AsyncSession = Depends(get_db),
     user = Depends(require_role(["admin"]))
 ):
