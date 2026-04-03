@@ -3,12 +3,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
 import uuid
 
+
+async def get_user_by_email(db: AsyncSession, email: str):
+    result = await db.execute(select(User).where(User.email == email))
+    return result.scalars().first()
+
+
 async def create_user(db: AsyncSession, data):
-    result = await db.execute(select(User).where(User.email == data.email))
-    existing_user = result.scalars().first()
-    
-    if existing_user:
-        return {"error": "User with this email already exists"}
     
     user = User(
         id=str(uuid.uuid4()),

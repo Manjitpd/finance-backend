@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import require_role
 from app.db.session import get_db
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
-from app.services.user_service import create_user, delete_user, get_all_users, get_user_by_id, update_user
+from app.services.user_service import create_user, delete_user, get_all_users, get_user_by_email, get_user_by_id, update_user
 from typing import List
 
 router = APIRouter()
@@ -14,6 +14,10 @@ async def create_user_api(
     db: AsyncSession = Depends(get_db),
     user = Depends(require_role(["admin"]))
 ):
+    exiting_user = await get_user_by_email(db, data.email)
+    if exiting_user:
+        raise HTTPException(status_code=400, detail="User with this email already exists")
+    
     result = await create_user(db, data)
     
     if "error" in result:

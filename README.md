@@ -19,6 +19,10 @@ It demonstrates:
 API Documentation (Swagger UI):  
 https://finance-backend-fz9d.onrender.com/docs
 
+Frontend App:
+https://finance-dashboard-frontend-amber.vercel.app
+
+
 
 ---
 ## 🔐 Demo Credentials
@@ -165,6 +169,13 @@ POST /auth/login
 ### 👤 Users (Admin Only)
 
 * `POST /users/` → Create user
+* `GET /users/` → Get all users (includes active & inactive)
+* `GET /users/{id}` → Get user by ID
+* `PUT /users/{id}` → Update user (Password is optional keeps old password if not provided)
+* `DELETE /users/{id}` → Soft delete
+
+
+
 
 ---
 
