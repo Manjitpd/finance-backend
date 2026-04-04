@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import require_role
 from app.db.session import get_db
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
-from app.services.user_service import create_user, delete_user, get_all_users, get_user_by_email, get_user_by_id, update_user
+from app.services.user_service import create_user, delete_user, get_all_users, get_user_by_email, get_user_by_id, toggle_user_status, update_user
 from typing import List
 
 router = APIRouter()
@@ -71,3 +71,18 @@ async def delete_user_api(
         raise HTTPException(status_code=404, detail="User not found")
 
     return {"message": "User deleted successfully"}
+
+
+
+@router.patch("/{user_id}/toggle-status")
+async def toggle_user_status_api(
+    user_id: str,
+    db: AsyncSession = Depends(get_db),
+    user=Depends(require_role(["admin"]))
+):
+    result = await toggle_user_status(db, user_id)
+
+    if not result:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {"message": "User status updated", "data": result}

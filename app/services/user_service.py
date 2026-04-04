@@ -100,3 +100,21 @@ async def delete_user(db: AsyncSession, user_id: str):
     await db.refresh(user)
 
     return True
+
+
+async def toggle_user_status(db: AsyncSession, user_id: str):
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalars().first()
+
+    if not user:
+        return None
+
+    user.is_active = not user.is_active
+
+    await db.commit()
+    await db.refresh(user)
+
+    return {
+        "id": user.id,
+        "is_active": user.is_active
+    }
